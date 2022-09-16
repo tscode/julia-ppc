@@ -5,15 +5,14 @@ This Repository aims to develop julia equivalents to the c++ code samples provid
 in [this online course](https://ppc.cs.aalto.fi/ch2/) on parallel programming by
 the Aalto University in Espoo, Finland.
 
-The code used in the case study is short, simple, and showcases many of the
-techniques for optimization on modern x86 CPUs. Therefore, it is a good
-didactical project to understand certain performance characteristics of Julia
-(like the usage of SIMD instructions) and to see in general how Julia fares
-against C++.
+The code used in the case study is short, simple, and showcases techniques for
+optimization on modern x86 CPUs. Therefore, it is a good project to understand
+certain performance characteristics of Julia (like the usage of SIMD
+instructions).
 
 ## Problem
 
-The problem is described [here](https://ppc.cs.aalto.fi/ch2/).
+The shortcut problem is described [here](https://ppc.cs.aalto.fi/ch2/).
 
 ## Implementations
 
@@ -46,4 +45,12 @@ benchmarking.
 ## Results
 
 To run the full benchmark (with `n = 1000`), first compile the gcc and clang
-shared libraries via `make` and then exectute `julia benchmark.jl`.
+shared libraries via `make` and then execute `julia benchmark.jl`.
+This requires the package `BenchmarkTools`. Besides
+printing information, this will also create the file `times.dat`, which
+can be visualized via the included gnuplot script `plot.gp`
+
+Below is an example for the Ryzen 7 5800x CPU.
+
+![](./plots/ryzen-7-5800x.svg)
+<img src = "./plots/ryzen-7-5800x.svg">

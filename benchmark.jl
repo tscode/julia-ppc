@@ -50,10 +50,11 @@ end
 using DelimitedFiles
 
 open("./times.dat", "w") do file
+  versions = ["v$i" for i in 0:4]
   println(file, "# julia")
-  writedlm(file, [time_julia.mean time_julia.std] ./ 1e9)
+  writedlm(file, [versions [time_julia.mean time_julia.std] ./ 1e9])
   println(file, "\n\n# gcc")
-  writedlm(file, [time_gcc.mean time_gcc.std] ./ 1e9)
+  writedlm(file, [versions [time_gcc.mean time_gcc.std] ./ 1e9])
   println(file, "\n\n# clang")
-  writedlm(file, [time_clang.mean time_clang.std] ./ 1e9)
+  writedlm(file, [versions [time_clang.mean time_clang.std] ./ 1e9])
 end
