@@ -17,7 +17,7 @@ The shortcut problem is described [here](https://ppc.cs.aalto.fi/ch2/).
 ## Implementations
 
 We consider several implementations that exploit increasingly sophisticated
-optimizations (like SIMD or proper L1-cache reusage). Put in simple terms, the
+optimizations (like SIMD or proper register reusage). Put in simple terms, the
 following version are compared:
 
 **v0.** Naive and straightforward implementation.
