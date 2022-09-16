@@ -50,7 +50,8 @@ This requires the package `BenchmarkTools`. Besides
 printing information, this will also create the file `times.dat`, which
 can be visualized via the included gnuplot script `plot.gp`
 
-Below is an example for the Ryzen 7 5800x CPU.
+Below are example timings for the desktop CPU AMD Ryzen 7 5800X CPU and laptop CPU
+Intel Core i5-8250U. In both cases, the official julia 1.8.0 binaries were used.
 
-![](./plots/ryzen-7-5800x.svg)
-<img src = "./plots/ryzen-7-5800x.svg">
+![performance plot ryzen-7-5800x](./plots/ryzen-7-5800x.svg)
+![performance plot i5-8250U](./plots/intel-i5-8250u.svg)
