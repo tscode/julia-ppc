@@ -111,12 +111,49 @@ function v3_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
     vv = vv0
     @inbounds for ka in 1:na
       z = dr[ka, i] .+ tr[ka, j]
-      vv = min.(vv, z)
+      @fastmath vv = min.(vv, z) # @fastmath needed, otherwise SIMD optimization does not seem to work
     end
     r[j, i] = minimum(vv)
   end
 
 end
+
+#using SIMD
+#
+#function v3_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
+#
+#  # sanity checks
+#  @assert size(r) == size(d_)
+#  @assert size(r, 1) == size(r, 2)
+#
+#  # dimensions
+#  n = size(r, 1)
+#  nb = 8
+#  na = div((n + nb - 1), nb)
+#
+#  # padded / transposed copies
+#  d = fill(Inf32, (na * nb, n))
+#  t = fill(Inf32, (na * nb, n))
+#
+#  d[1:n,1:n] .= d_
+#  t[1:n,1:n] .= d_'
+#
+#  # use static vectors to enable SIMD
+#  dr = reinterpret(Vec{nb, Float32}, d) |> collect
+#  tr = reinterpret(Vec{nb, Float32}, t) |> collect
+#
+#  # solving the shortcut problem
+#  vv0 = Vec{8, Float32}((Inf32, Inf32, Inf32, Inf32, Inf32, Inf32, Inf32, Inf32))
+#  for i in 1:n, j in 1:n
+#    vv = vv0
+#    @inbounds for ka in 1:na
+#      z = dr[ka, i] + tr[ka, j]
+#      vv = min(vv, z)
+#    end
+#    r[j, i] = minimum(vv)
+#  end
+#
+#end
 
 
 # SIMD + better reusage of register data
@@ -159,15 +196,15 @@ function v4_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
       x1 = dr[ka, 1, ic]
       x2 = dr[ka, 2, ic]
       x3 = dr[ka, 3, ic]
-      vv[1, 1] = min.(vv[1, 1], x1 + y1)
-      vv[1, 2] = min.(vv[1, 2], x1 + y2)
-      vv[1, 3] = min.(vv[1, 3], x1 + y3)
-      vv[2, 1] = min.(vv[2, 1], x2 + y1)
-      vv[2, 2] = min.(vv[2, 2], x2 + y2)
-      vv[2, 3] = min.(vv[2, 3], x2 + y3)
-      vv[3, 1] = min.(vv[3, 1], x3 + y1)
-      vv[3, 2] = min.(vv[3, 2], x3 + y2)
-      vv[3, 3] = min.(vv[3, 3], x3 + y3)
+      @fastmath vv[1, 1] = min.(vv[1, 1], x1 + y1)
+      @fastmath vv[1, 2] = min.(vv[1, 2], x1 + y2)
+      @fastmath vv[1, 3] = min.(vv[1, 3], x1 + y3)
+      @fastmath vv[2, 1] = min.(vv[2, 1], x2 + y1)
+      @fastmath vv[2, 2] = min.(vv[2, 2], x2 + y2)
+      @fastmath vv[2, 3] = min.(vv[2, 3], x2 + y3)
+      @fastmath vv[3, 1] = min.(vv[3, 1], x3 + y1)
+      @fastmath vv[3, 2] = min.(vv[3, 2], x3 + y2)
+      @fastmath vv[3, 3] = min.(vv[3, 3], x3 + y3)
     end
     @inbounds for id in 1:nd, jd in 1:nd
       i = nd * (ic-1) + id
@@ -178,6 +215,65 @@ function v4_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
     end
   end
 end
+
+#function v4_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
+#
+#  # sanity checks
+#  @assert size(r) == size(d_)
+#  @assert size(r, 1) == size(r, 2)
+#
+#  # dimensions
+#  n = size(r, 1)
+#  nb = 8
+#  na = div((n + nb - 1), nb)
+#  nd = 3
+#  nc = div((n + nd - 1), nd)
+#
+#  # padded / transposed copies
+#  d = fill(Inf32, (na * nb, nc * nd))
+#  t = fill(Inf32, (na * nb, nc * nd))
+#
+#  d[1:n,1:n] .= d_
+#  t[1:n,1:n] .= d_'
+#
+#  # using static vectors to enable SIMD
+#  dr = reinterpret(Vec{nb, Float32}, d) |> collect
+#  tr = reinterpret(Vec{nb, Float32}, t) |> collect
+#  dr = reshape(dr, na, nd, nc)
+#  tr = reshape(tr, na, nd, nc)
+#
+#  # solving the shortcut problem
+#  v0 = Vec{nb, Float32}((Inf32, Inf32, Inf32, Inf32, Inf32, Inf32, Inf32, Inf32))
+#  vv = fill(v0, nd, nd)
+#
+#  for ic in 1:nc, jc in 1:nc
+#    fill!(vv, v0)
+#    @inbounds for ka in 1:na
+#      y1 = tr[ka, 1, jc]
+#      y2 = tr[ka, 2, jc]
+#      y3 = tr[ka, 3, jc]
+#      x1 = dr[ka, 1, ic]
+#      x2 = dr[ka, 2, ic]
+#      x3 = dr[ka, 3, ic]
+#      vv[1, 1] = min(vv[1, 1], x1 + y1)
+#      vv[1, 2] = min(vv[1, 2], x1 + y2)
+#      vv[1, 3] = min(vv[1, 3], x1 + y3)
+#      vv[2, 1] = min(vv[2, 1], x2 + y1)
+#      vv[2, 2] = min(vv[2, 2], x2 + y2)
+#      vv[2, 3] = min(vv[2, 3], x2 + y3)
+#      vv[3, 1] = min(vv[3, 1], x3 + y1)
+#      vv[3, 2] = min(vv[3, 2], x3 + y2)
+#      vv[3, 3] = min(vv[3, 3], x3 + y3)
+#    end
+#    @inbounds for id in 1:nd, jd in 1:nd
+#      i = nd * (ic-1) + id
+#      j = nd * (jc-1) + jd
+#      if i <= n && j <= n
+#        r[j, i] = minimum(vv[id, jd])
+#      end
+#    end
+#  end
+#end
 
 # wrapped c++ versions
 

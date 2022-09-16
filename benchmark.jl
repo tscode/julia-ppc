@@ -4,10 +4,10 @@ include("./ppc.jl")
 using BenchmarkTools
 using Statistics
 
-const n = 1000
-const r = zeros(Float32, n, n)
-const r_tmp = zeros(Float32, n, n)
-const d = rand(Float32, n, n)
+n = 1000
+r = zeros(Float32, n, n)
+r_tmp = zeros(Float32, n, n)
+d = rand(Float32, n, n)
 
 time_julia = (mean = [], std = [])
 time_gcc = (mean = [], std = [])
@@ -23,7 +23,6 @@ function reset!(r, r_tmp)
   fill!(r, 0f0)
 end
 
-
 # get a correct initialization of r_tmp
 v0_julia(r_tmp, d)
 
@@ -36,7 +35,6 @@ for version in 0:4
     tname = Symbol("time_$(compiler)")
     println("\n$(fname):")
     quote
-      $fname(r, d)
       bm = @benchmark $fname(r, d)
       display(bm)
       add_timing!($tname, bm)
