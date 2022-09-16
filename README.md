@@ -28,7 +28,7 @@ can be used for both summands.
 **v2.** Break the sequential dependency in the inner loop by breaking it in
 several independent parts.
 
-**v3.** Exploit AVX instructions to compute 8 Float64 additions and mins in
+**v3.** Exploit AVX instructions to compute 8 Float32 additions and mins in
 parallel.
 
 **v4.** Improve L1-cache data reuse by changing the order of looping.
