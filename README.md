@@ -31,7 +31,7 @@ several independent parts.
 **v3.** Exploit AVX instructions to compute 8 Float32 additions and mins in
 parallel.
 
-**v4.** Improve L1-cache data reuse by changing the order of looping.
+**v4.** Improve register reuse by changing the order of looping.
 
 The [lecture notes](https://ppc.cs.aalto.fi/ch2/) provide more optimizations (up
 to v7), but this repository currently only explores v0 to v4. The corresponding

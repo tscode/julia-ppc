@@ -61,15 +61,17 @@ function v2_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
   d[1:n, 1:n] .= d_
   t[1:n, 1:n] .= d_'
 
+  # make indexing more straightforward
+  d = reshape(d, nb, na, :)
+  t = reshape(t, nb, na, :)
+
   # solving the shortcut problem
   vv = fill(Inf32, nb)
   for i in 1:n, j in 1:n
     fill!(vv, Inf32)
-    for ka in 0:(na-1)
+    for ka in 1:na
       @inbounds for kb in 1:nb
-        x = d[ka * nb + kb, i]
-        y = t[ka * nb + kb, j]
-        z = x + y
+        z = d[kb, ka, i] + t[kb, ka, j]
         vv[kb] = min(vv[kb], z)
       end
     end
@@ -117,7 +119,7 @@ function v3_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
 end
 
 
-# SIMD + better reusage of data in L1-cache = win
+# SIMD + better reusage of register data
 function v4_julia(r :: Matrix{Float32}, d_ :: Matrix{Float32})
 
   # sanity checks
